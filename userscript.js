@@ -2,62 +2,50 @@
 // @name	 BetterQuercus
 // @description Improvements for Quercus
 // @namespace http://airstrafe.net
-// @version	 1
+// @version	 0.1
 // @run-at document-end
 // @require https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js
 // @include https://q.utoronto.ca/*
 // ==/UserScript==
 
 /**** CONSTANTS ****/
-const trace = true;
-const minHeaderWidth = 20;
+const trace = true; // Output debug info
+const minHeaderWidth = 20; // Width of header when minimized
+const biggerFilePadding = '24'; // How much padding for bigger file preview (default 24)
+const hideNavBar = true; // Hide the left navigation bar unless moused over
+const neverExpandNavBar = true; // Automatically collapse the left navigation bar to not have item titles
+const biggerFilePreview = true; // Expand file preview window
+
 
 /**** ENTRYPOINT ****/
-if (trace) console.log("Loaded BetterQuercus");
-
+log("Loaded BetterQuercus");
 this.$ = this.jQuery = jQuery.noConflict(true);
-
-var settings = loadSettings();
 init();
+log("Successfully completed initialization");
 
 
 /**** FUNCTIONS ****/
 function log(info) {
-    if (trace) console.log(info); 
-}
-
-function loadSettings() {
-    // TODO load from GM
-    var settings = {hideNavBar: true, neverExpandNavBar: true, biggerFilePreview: true};
-    log("Loaded settings");
-    return settings;
+    if (trace) console.log('BQ: ' + info); 
 }
 
 function init() {
-	createSettingsButton();
-    if (settings.neverExpandNavBar && $('body').hasClass('primary-nav-expanded')) {
-	    $('#primaryNavToggle').click();
+    if (neverExpandNavBar && $('body').hasClass('primary-nav-expanded')) {
+        $('#primaryNavToggle').click();
+        log('Minimized navigation bar');
     }
-	if (settings.hideNavBar) {
+    if (hideNavBar) {
         initMinimizeHeader();
     }
-    if (window.location.href.indexOf('/files/') != -1 && settings.biggerFilePreview) {
+    if (window.location.href.indexOf('/files/') != -1 && biggerFilePreview) {
         makeFilePreviewBigger();
     }
-}
-
-function createSettingsButton() {
-    var menu = $('#menu');
-    var settingsButton = menu.children('.ic-app-header__menu-list-item').last().clone();
-    settingsButton.children().remove();
-    settingsButton.append('<a class="ic-app-header__menu-list-link"><i class="icon-hamburger" style="color: white"></i></a>');
-    // TODO create settings dialog onClick
-    menu.append(settingsButton);
 }
 
 function initMinimizeHeader() {
     $('#header').hover(headerEnter, headerExit);
     headerExit();
+    log('Hid navigation bar');
 }
 
 function headerExit() {
@@ -77,12 +65,13 @@ function makeFilePreviewBigger() {
     }
     // Remove redundant filename and make filename smaller
     var content = $('#content');
-    content.css('padding', '20');
-	content.children().first().remove();
+    content.css('padding', biggerFilePadding);
+    content.children().first().remove();
     var dlLink = content.children().first().children().first().attr('style', 'font-size: 2em').children();
     // Remove word "download" if language is English
     if ($('html').attr('lang').indexOf('en-') == 0) {
-	var dlText = dlLink.text();
+        var dlText = dlLink.text();
         dlLink.text(dlText.substring(9, dlText.length));
     }
+    log('Made file preview bigger');
 }
